@@ -1,0 +1,135 @@
+import pandas as pd
+from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error, accuracy_score
+from xgboost import XGBRegressor
+from sklearn.multioutput import MultiOutputRegressor
+
+# =====================
+# LOAD & CLEAN DATA
+# =====================
+data = "Finance.csv"
+df = pd.read_csv(data)
+
+# Encode categorical columns
+categorical_cols = ['gender', 'education_level', 'employment_status', 'job_title', 'loan_type', 'region']
+label_encoders = {}
+for col in categorical_cols:
+    df[col] = df[col].fillna('Unknown').astype(str).str.strip()
+    le = LabelEncoder()
+    df[col] = le.fit_transform(df[col])
+    label_encoders[col] = le
+
+# Encode has_loan column (Yes/No → 1/0) if exists
+if 'has_loan' in df.columns and df['has_loan'].dtype == object:
+    df['has_loan'] = df['has_loan'].str.strip().str.lower().map({'yes': 1, 'no': 0})
+    df['has_loan'] = df['has_loan'].fillna(0).astype(int)
+
+# Drop rows missing key numerical values
+df = df.dropna(subset=['loan_amount_usd', 'credit_score', 'monthly_emi_usd', 'loan_interest_rate_pct', 'loan_term_months'])
+
+# =====================
+# FEATURES & TARGETS
+# =====================
+feature_cols = [
+    'age', 'gender', 'education_level', 'employment_status', 'job_title',
+    'monthly_income_usd', 'monthly_expenses_usd', 'savings_usd',
+    'has_loan', 'loan_type', 'loan_amount_usd', 'credit_score',
+    'debt_to_income_ratio', 'savings_to_income_ratio', 'region'
+]
+
+regression_targets = ['monthly_emi_usd', 'loan_interest_rate_pct', 'loan_term_months']
+
+classification_target = 'loan_approved'
+if classification_target not in df.columns:
+    df[classification_target] = ((df['credit_score'] > 650) & (df['debt_to_income_ratio'] < 0.4)).astype(int)
+
+# =====================
+# REGRESSION MODEL
+# =====================
+X_reg = df[feature_cols]
+y_reg = df[regression_targets]
+
+X_train_reg, X_test_reg, y_train_reg, y_test_reg = train_test_split(X_reg, y_reg, test_size=0.05, random_state=2025)
+
+xgb_base = XGBRegressor(n_estimators=300, learning_rate=0.1, random_state=2025)
+xgb_reg = MultiOutputRegressor(xgb_base)
+xgb_reg.fit(X_train_reg, y_train_reg)
+
+y_pred_reg = xgb_reg.predict(X_test_reg)
+mse_reg = mean_squared_error(y_test_reg, y_pred_reg)
+r2_reg = r2_score(y_test_reg, y_pred_reg)
+mae_reg = mean_absolute_error(y_test_reg, y_pred_reg)
+mean_actual_reg = y_test_reg.mean().mean()
+accuracy_pct_reg = 100 - (mae_reg / mean_actual_reg * 100)
+
+print("\n📈 Regression Model Evaluation:")
+print(f"🔹 MSE: {mse_reg:.2f}")
+print(f"🔹 R²: {r2_reg:.4f}")
+print(f"🔹 MAE: {mae_reg:.2f}")
+print(f"✅ Estimated Accuracy: {accuracy_pct_reg:.2f}%")
+
+# =====================
+# CLASSIFICATION MODEL
+# =====================
+X_clf = df[feature_cols]
+y_clf = df[classification_target]
+
+X_train_clf, X_test_clf, y_train_clf, y_test_clf = train_test_split(X_clf, y_clf, test_size=0.05, random_state=2025)
+
+rf_clf = RandomForestClassifier(n_estimators=300, random_state=2025)
+rf_clf.fit(X_train_clf, y_train_clf)
+
+y_pred_clf = rf_clf.predict(X_test_clf)
+clf_acc = accuracy_score(y_test_clf, y_pred_clf) * 100
+print("\n📊 Classification Model Evaluation:")
+print(f"✅ Accuracy: {clf_acc:.2f}%")
+
+# =====================
+# USER INPUT PREDICTION
+# =====================
+try:
+    print("\n--- Enter Loan Application Details ---")
+    user_data = {}
+
+    input_cols = [
+        'age', 'gender', 'education level', 'employment status', 'job title',
+        'monthly income in usd', 'monthly expenses in usd', 'total savings in usd',
+        'loan type', 'loan amount in usd', 'credit score', 'region'
+    ]
+
+    for col in input_cols:
+        if col in categorical_cols:
+            options = list(label_encoders[col].classes_)
+            val = input(f"{col} ({options}): ").strip().lower()
+            match = next((o for o in options if o.lower() == val), 'Unknown')
+            user_data[col] = label_encoders[col].transform([match])[0]
+        else:
+            user_data[col] = float(input(f"{col}: "))
+
+    # Auto-calculate these features
+    user_data['has_loan'] = 1 if user_data['loan_amount_usd'] > 0 else 0
+    income = max(user_data['monthly_income_usd'], 1)  # avoid div by zero
+    user_data['debt_to_income_ratio'] = user_data['monthly_expenses_usd'] / income
+    user_data['savings_to_income_ratio'] = user_data['savings_usd'] / income
+
+    # Create input DataFrame with features in right order
+    ordered_features = {feat: user_data[feat] for feat in feature_cols}
+    input_features = pd.DataFrame([ordered_features], columns=feature_cols)
+
+    # Predict regression outputs
+    pred_reg = xgb_reg.predict(input_features)[0]
+    emi_pred, interest_pred, term_pred = pred_reg
+
+    # Predict loan approval probability
+    loan_prob = rf_clf.predict_proba(input_features)[0][1] * 100
+    import math
+    print("\n📌 Predicted Loan Details:")
+    print(f"💵 Monthly EMI: ${emi_pred:.2f}")
+    print(f"📈 Interest Rate: {interest_pred:.2f}%")
+    print(f"📅 Loan Term: {math.fabs(term_pred):.0f} months")
+    print(f"✅ Approval Probability: {loan_prob:.2f}%")
+
+except Exception as e:
+    print(f"⚠️ Error: {e}")
