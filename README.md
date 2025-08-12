@@ -48,10 +48,10 @@ region (['North', 'South', 'East', 'West', 'Unknown']): north
 
 
 ## This is a fined a model from scratch.
-Proof:Training from scratch means you initialize a model with 
-random weights (or a fresh, untrained instance) and train it entirely 
-on your dataset from the beginning. No prior knowledge is used.
+## Proof:Training from scratch means you initialize a model with 
+## random weights (or a fresh, untrained instance) and train it entirely 
+## on your dataset from the beginning. No prior knowledge is used.
 
 ## I created most of this with my own knowledge but I also used AI (ChatGPT) 
-to debug and make it better like adding 
-the Approval Probability for the output. Otherwise I have done everything Myself :) 
+## to debug and make it better like adding 
+## the Approval Probability for the output. Otherwise I have done everything Myself :) 
