@@ -48,7 +48,7 @@ region (['North', 'South', 'East', 'West', 'Unknown']): north
 
 
 ## This is a model that I made from scratch.
-## Proof:
+## Explaination:
 Training from scratch means you initialize a model with 
 random weights (or a fresh, untrained instance) and train it entirely 
 on your dataset from the beginning. No prior knowledge is used.
