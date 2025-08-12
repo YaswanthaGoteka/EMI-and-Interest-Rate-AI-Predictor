@@ -13,8 +13,8 @@ Imports:
 - XGBRegressor
 - MultiOutputRegressor
 
-Example Output:
-📈 Regression Model Evaluation:
+## Example Output:
+'''📈 Regression Model Evaluation:
 🔹 MSE: 0.42
 🔹 R²: 0.91
 🔹 MAE: 0.15
@@ -41,13 +41,13 @@ region (['North', 'South', 'East', 'West', 'Unknown']): north
 💵 Monthly EMI: $450.75
 📈 Interest Rate: 6.20%
 📅 Loan Term: 36 months
-✅ Approval Probability: 89.40%
+✅ Approval Probability: 89.40%'''
 
-This is a fined a model from scratch.
+## This is a fined a model from scratch.
 Proof:Training from scratch means you initialize a model with 
 random weights (or a fresh, untrained instance) and train it entirely 
 on your dataset from the beginning. No prior knowledge is used.
 
-I created most of this with my own knowledge but I also used AI (ChatGPT) 
+## I created most of this with my own knowledge but I also used AI (ChatGPT) 
 to debug and make it better like adding 
 the Approval Probability for the output. Otherwise I have done everything Myself :) 
