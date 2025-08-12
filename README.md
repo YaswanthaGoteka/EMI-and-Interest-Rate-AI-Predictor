@@ -14,7 +14,7 @@ Imports:
 - MultiOutputRegressor
 
 ## Example Output:
-'''📈 Regression Model Evaluation:
+📈 Regression Model Evaluation:
 🔹 MSE: 0.42
 🔹 R²: 0.91
 🔹 MAE: 0.15
@@ -41,7 +41,7 @@ region (['North', 'South', 'East', 'West', 'Unknown']): north
 💵 Monthly EMI: $450.75
 📈 Interest Rate: 6.20%
 📅 Loan Term: 36 months
-✅ Approval Probability: 89.40%'''
+✅ Approval Probability: 89.40%
 
 ## This is a fined a model from scratch.
 Proof:Training from scratch means you initialize a model with 
