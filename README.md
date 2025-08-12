@@ -15,14 +15,15 @@ Imports:
 
 ## Example Output:
 
+~~~
 📈 Regression Model Evaluation:
 🔹 MSE: 0.42
 🔹 R²: 0.91
 🔹 MAE: 0.15
-✅ Estimated Accuracy: 96.70%
+✅ Estimated Accuracy: 97.05%
 
 📊 Classification Model Evaluation:
-✅ Accuracy: 93.50%
+✅ Accuracy: 100%
 
 --- Enter Loan Application Details ---
 age (['18-25', '26-35', '36-45', '46-55', '56+']): 34
@@ -39,10 +40,12 @@ credit_score: 720
 region (['North', 'South', 'East', 'West', 'Unknown']): north
 
 📌 Predicted Loan Details:
-💵 Monthly EMI: $450.75
-📈 Interest Rate: 6.20%
+💵 Monthly EMI: $1921.05
+📈 Interest Rate: 17.64%
 📅 Loan Term: 36 months
-✅ Approval Probability: 89.40%
+✅ Approval Probability: 97.67%
+~~~
+
 
 ## This is a fined a model from scratch.
 Proof:Training from scratch means you initialize a model with 
